@@ -1,0 +1,28 @@
+# --- Airflow & Infrastructure ---
+logs/
+data/
+reports/
+*.db
+*.pid
+airflow.cfg
+webserver_config.py
+unittests.cfg
+.env
+
+# --- Prometheus & Monitoring ---
+# Se o Prometheus gerar dados locais de retenção, ignore-os
+prometheus_data/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+
+# --- Segurança (Obrigatório) ---
+gitlab_deploy_key
+*_key
+*.pem
+
+# --- IDEs ---
+.vscode/
+.idea/
