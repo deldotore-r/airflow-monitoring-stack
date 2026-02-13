@@ -1,0 +1,24 @@
+mappings:
+  # Mapeia a duração das tarefas (Tasks)
+  - match: airflow.dag.*.task.*.duration
+    name: "airflow_task_duration"
+    labels:
+      dag_id: "$1"
+      task_id: "$2"
+
+  # Mapeia o sucesso/falha das DAGs
+  - match: airflow.dagrun.status.*.*
+    name: "airflow_dagrun_status"
+    labels:
+      status: "$1"
+      dag_id: "$2"
+
+  # Mapeia erros gerais do Airflow
+  - match: airflow.dag_processing.last_duration.*
+    name: "airflow_dag_processing_duration"
+    labels:
+      dag_file: "$1"
+
+  # Mapeia o estado do Scheduler
+  - match: airflow.scheduler.heartbeat
+    name: "airflow_scheduler_heartbeat"

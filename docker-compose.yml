@@ -1,0 +1,70 @@
+services:
+  # O Tradutor: Recebe métricas do Airflow (StatsD) e expõe para o Prometheus
+  statsd-exporter:
+    image: prom/statsd-exporter:v0.24.0
+    container_name: statsd-exporter
+    command:
+      - "--statsd.listen-udp=:8125"
+    volumes:
+      - ./config/statsd_mapping.yaml:/etc/statsd-exporter/statsd_mapping.yaml
+    ports:
+      - "9102:9102"      # Porta onde o Prometheus coleta os dados
+      - "8125:8125/udp"  # Porta onde o Airflow envia os dados
+    networks:
+      - monitoring-network
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # O Banco de Dados: Armazena as métricas ao longo do tempo
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=2d'
+      - '--storage.tsdb.retention.size=512MB'
+    container_name: prometheus
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring-network
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # A Visualização: Dashboards profissionais
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin # Senha padrão para o seu Lab
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring-network
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  monitoring-network:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  grafana_data:
