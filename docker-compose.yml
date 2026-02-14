@@ -22,15 +22,15 @@ services:
   # O Banco de Dados: Armazena as métricas ao longo do tempo
   prometheus:
     image: prom/prometheus:v2.45.0
+    container_name: prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
       - '--storage.tsdb.retention.time=2d'
       - '--storage.tsdb.retention.size=512MB'
-    container_name: prometheus
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./prometheus_data:/prometheus
+      - ./data/prometheus:/prometheus
     healthcheck:
       test: ["CMD", "wget", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
       interval: 10s
@@ -53,9 +53,9 @@ services:
     image: grafana/grafana:10.0.0
     container_name: grafana
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin # Senha padrão para o seu Lab
+      - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
-      - grafana_data:/var/lib/grafana
+      - ./data/grafana:/var/lib/grafana
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 10s
@@ -75,10 +75,5 @@ services:
 
 networks:
   monitoring-network:
+    name: monitoring-network
     driver: bridge
-
-volumes:
-  prometheus_data:
-  grafana_data:
-    external: true
-    name: airflow-monitoring-stack_grafana_data
